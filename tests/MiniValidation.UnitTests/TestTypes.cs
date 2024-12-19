@@ -1,4 +1,6 @@
-﻿namespace MiniValidation.UnitTests;
+﻿using Microsoft.Extensions.DependencyInjection;
+
+namespace MiniValidation.UnitTests;
 
 class TestType
 {
@@ -78,6 +80,11 @@ class TestClassLevelValidatableOnlyTypeWithServiceProvider : IValidatableObject
             yield return new ValidationResult($"This validationContext did not support ServiceProvider.", new[] { nameof(IServiceProvider) });
         }
     }
+}
+
+class TestClassWithEnumerable<TEnumerable>
+{
+    public IEnumerable<TEnumerable>? Enumerable { get; set; }
 }
 
 class TestClassLevelAsyncValidatableOnlyType : IAsyncValidatableObject
@@ -177,7 +184,11 @@ class TestAsyncValidatableChildType : TestChildType, IAsyncValidatableObject
 
     public async Task<IEnumerable<ValidationResult>> ValidateAsync(ValidationContext validationContext)
     {
-        await Task.Yield();
+        var taskToAwait = validationContext.GetService<Task>();
+        if (taskToAwait is not null)
+        {
+            await taskToAwait;
+        }
 
         List<ValidationResult>? result = null;
         if (TwentyOrMore < 20)
@@ -227,7 +238,9 @@ abstract record BaseRecordType(string Type);
 record TestRecordType([Required, Display(Name = "Required name")] string RequiredName = "Default", [Range(10, 100)] int TenOrMore = 10)
     : BaseRecordType(nameof(TestRecordType))
 {
+#pragma warning disable IDE0060 // Remove unused parameter
     public TestRecordType(string anotherParam, bool doTheThing) : this("Another name", 23)
+#pragma warning restore IDE0060 // Remove unused parameter
     {
     }
 };
@@ -237,4 +250,12 @@ class ClassWithUri
 {
     [Required]
     public Uri? BaseAddress { get; set; }
+}
+
+class TestTypeForTypeDescriptor
+{
+    public string? PropertyToBeRequired { get; set; }
+
+    [MaxLength(1)]
+    public string? AnotherProperty { get; set; } = "Test";
 }

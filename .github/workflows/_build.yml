@@ -17,7 +17,7 @@ jobs:
     - uses: actions/checkout@v3
     
     - name: Install .NET SDK
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 6.0.x
         global-json-file: "./global.json"
@@ -55,7 +55,7 @@ jobs:
       run: dotnet pack --configuration Release --output ./artifacts/ship --verbosity normal -p:BuildNumber=$BUILD_NUMBER -p:SourceRevisionId=$GITHUB_SHA -p:ContinuousIntegrationBuild=true -p:IsShipCandidate=true
 
     - name: Upload artifacts (packages)
-      uses: actions/upload-artifact@master
+      uses: actions/upload-artifact@v4
       with:
         name: nupkg
         path: ./artifacts/**/*.nupkg
